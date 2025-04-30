@@ -18,43 +18,68 @@ const Signup = ({ setToken, setUser }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [errors, setErrors] = useState({
+    email: '',
+    username: '',
+    password: '',
+    confirmPassword: '',
+    general: '',
+  });
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);
+    setErrors({
+      email: '',
+      username: '',
+      password: '',
+      confirmPassword: '',
+      general: '',
+    });
 
     // Client-side validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address.');
+      setErrors((prev) => ({
+        ...prev,
+        email: 'Please enter a valid email address.',
+      }));
       setIsLoading(false);
       return;
     }
 
     if (!username) {
-      setError('Username is required.');
+      setErrors((prev) => ({ ...prev, username: 'Username is required.' }));
       setIsLoading(false);
       return;
     }
 
     const usernameRegex = /^[a-zA-Z0-9_]+$/;
     if (!usernameRegex.test(username)) {
-      setError('Username can only contain letters, numbers, and underscores.');
+      setErrors((prev) => ({
+        ...prev,
+        username:
+          'Username can only contain letters, numbers, and underscores.',
+      }));
       setIsLoading(false);
       return;
     }
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters long.');
+      setErrors((prev) => ({
+        ...prev,
+        password: 'Password must be at least 8 characters long.',
+      }));
       setIsLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setErrors((prev) => ({
+        ...prev,
+        confirmPassword: 'Passwords do not match.',
+      }));
       setIsLoading(false);
       return;
     }
@@ -83,29 +108,66 @@ const Signup = ({ setToken, setUser }) => {
         'Signup error:',
         error.response ? error.response.data : error.message
       );
-      setError(
-        error.response?.data?.error || 'Signup failed. Please try again.'
-      );
+      if (error.response && error.response.data) {
+        const serverErrors = error.response.data;
+        console.log('Server errors received:', serverErrors);
+        if (serverErrors.error) {
+          if (serverErrors.error.toLowerCase().includes('email')) {
+            setErrors((prev) => ({ ...prev, email: serverErrors.error }));
+          } else if (serverErrors.error.toLowerCase().includes('username')) {
+            setErrors((prev) => ({ ...prev, username: serverErrors.error }));
+          } else {
+            setErrors((prev) => ({ ...prev, general: serverErrors.error }));
+          }
+        } else if (serverErrors.email) {
+          setErrors((prev) => ({ ...prev, email: serverErrors.email[0] }));
+        } else if (serverErrors.username) {
+          setErrors((prev) => ({
+            ...prev,
+            username: serverErrors.username[0],
+          }));
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            general: 'Signup failed. Please try again.',
+          }));
+        }
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          general: 'Unable to connect to the server. Please try again later.',
+        }));
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center p-6 md:p-10">
+    <div className="flex min-h-screen w-full items-center justify-center p-6 md:p-10 bg-gray-50 relative">
+      {/* Back to Home Link */}
+      <div className="absolute top-4 left-4">
+        <Link to="/">
+          <h1 className="text-2xl font-bold font-poppins text-blue-600 hover:text-blue-800 transition-colors">
+            LifeCanvas
+          </h1>
+        </Link>
+      </div>
       <div className="w-full max-w-sm">
-        <Card>
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-2xl">Sign Up</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-poppins">Sign Up</CardTitle>
+            <CardDescription className="font-poppins">
               Create a new account to start capturing your memories
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSignup}>
+            <form onSubmit={handleSignup} noValidate>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="font-poppins">
+                    Email
+                  </Label>
                   <Input
                     id="email"
                     type="email"
@@ -114,9 +176,16 @@ const Signup = ({ setToken, setUser }) => {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm font-poppins">
+                      {errors.email}
+                    </p>
+                  )}
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="username">Username</Label>
+                  <Label htmlFor="username" className="font-poppins">
+                    Username
+                  </Label>
                   <Input
                     id="username"
                     type="text"
@@ -125,9 +194,16 @@ const Signup = ({ setToken, setUser }) => {
                     onChange={(e) => setUsername(e.target.value)}
                     required
                   />
+                  {errors.username && (
+                    <p className="text-red-500 text-sm font-poppins">
+                      {errors.username}
+                    </p>
+                  )}
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="font-poppins">
+                    Password
+                  </Label>
                   <Input
                     id="password"
                     type="password"
@@ -135,9 +211,16 @@ const Signup = ({ setToken, setUser }) => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
+                  {errors.password && (
+                    <p className="text-red-500 text-sm font-poppins">
+                      {errors.password}
+                    </p>
+                  )}
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <Label htmlFor="confirm-password" className="font-poppins">
+                    Confirm Password
+                  </Label>
                   <Input
                     id="confirm-password"
                     type="password"
@@ -145,17 +228,31 @@ const Signup = ({ setToken, setUser }) => {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                   />
+                  {errors.confirmPassword && (
+                    <p className="text-red-500 text-sm font-poppins">
+                      {errors.confirmPassword}
+                    </p>
+                  )}
                 </div>
-                {error && (
-                  <p className="text-red-500 text-sm text-center">{error}</p>
+                {errors.general && (
+                  <p className="text-red-500 text-sm text-center font-poppins">
+                    {errors.general}
+                  </p>
                 )}
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
+                  disabled={isLoading}
+                >
                   {isLoading ? 'Signing up...' : 'Sign Up'}
                 </Button>
               </div>
-              <div className="mt-4 text-center text-sm">
+              <div className="mt-4 text-center text-sm font-poppins">
                 Already have an account?{' '}
-                <Link to="/login" className="underline underline-offset-4">
+                <Link
+                  to="/login"
+                  className="underline underline-offset-4 hover:text-blue-600"
+                >
                   Login
                 </Link>
               </div>
