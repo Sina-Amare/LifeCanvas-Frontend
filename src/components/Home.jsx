@@ -8,7 +8,7 @@ import {
   UsersIcon,
 } from '@heroicons/react/24/outline';
 
-const Home = () => {
+const Home = ({ token, user, handleLogout }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
@@ -16,16 +16,32 @@ const Home = () => {
         <div className="flex justify-between items-center max-w-6xl mx-auto">
           <h1 className="text-3xl font-bold font-poppins">LifeCanvas</h1>
           <div className="space-x-4">
-            <Link to="/login">
-              <Button className="bg-gradient-to-r from-blue-400 to-blue-600 text-white hover:from-blue-500 hover:to-blue-700 transition-all duration-300 shadow-md">
-                Sign In
-              </Button>
-            </Link>
-            <Link to="/signup">
-              <Button className="bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-md">
-                Sign Up
-              </Button>
-            </Link>
+            {token ? (
+              <>
+                <span className="text-sm font-poppins bg-white text-blue-600 px-3 py-1 rounded-full shadow-md">
+                  Welcome, {user?.username || 'User'}!
+                </span>
+                <Button
+                  onClick={handleLogout}
+                  className="bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-md"
+                >
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button className="bg-gradient-to-r from-blue-400 to-blue-600 text-white hover:from-blue-500 hover:to-blue-700 transition-all duration-300 shadow-md">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button className="bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-md">
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>

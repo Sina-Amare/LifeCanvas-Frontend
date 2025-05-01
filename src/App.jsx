@@ -78,7 +78,12 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route
+          path="/"
+          element={
+            <Home token={token} user={user} handleLogout={handleLogout} />
+          }
+        />
         <Route
           path="/login"
           element={

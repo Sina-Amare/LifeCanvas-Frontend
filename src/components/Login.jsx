@@ -45,12 +45,13 @@ const Login = ({ setToken, setUser }) => {
       console.log('Login response:', response.data);
       setToken(response.data.access);
       try {
-        const userResponse = await api.get('/users/me/', {
+        const userResponse = await api.get('/test/', {
           headers: { Authorization: `Bearer ${response.data.access}` },
         });
+        console.log('User data fetched after login:', userResponse.data); // Debug log
         setUser({
-          email: userResponse.data.email,
-          username: userResponse.data.username,
+          email: userResponse.data.user.email,
+          username: userResponse.data.user.username,
         });
       } catch (userError) {
         console.error('Error fetching user data:', userError);

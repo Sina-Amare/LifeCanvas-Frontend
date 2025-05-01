@@ -102,6 +102,10 @@ const Signup = ({ setToken, setUser }) => {
         email: response.data.user.email,
         username: response.data.user.username,
       });
+      console.log('User set after signup:', {
+        email: response.data.user.email,
+        username: response.data.user.username,
+      }); // Debug log
       navigate('/journals');
     } catch (error) {
       console.error(
